@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Montly Hours Calendar</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: darkgrey;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2em;
+      background: #000;
+      color: #fff;
+      min-height: 10vh;
+      text-align: center;
+    }
+
+    ul, ol {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-gap: 1em;
+      margin: 0 auto;
+      max-width: 64em;
+      padding: 0;
+    }
+
+    li {
+      list-style: none;
+      margin-left: 0;
+    }
+
+    li .day-num {
+      color: #fff;
+      width: 100%;
+      padding-left: 7px;
+    }
+
+    ul.weekdays {
+      margin-bottom: 0em;
+    }
+
+    ul.weekdays li {
+      height: 2em;
+    }
+
+    ol.day-grid li {
+      border: 1px solid #eaeaea;
+      height: 12vw;
+      max-height: 125px;
+    }
+
+    .head-input {
+      font-size: 40px;
+    }
+
+    #months {
+      padding: 2px;
+      color: white;
+      background-color: black;
+      border: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none:
+    }
+
+    #years {
+      width: 120px;
+      color: white;
+      background-color: black;
+      border: none;
+    }
+
+    .in-month {
+      background-color: #eee;
+    }
+
+    .out-month {
+      background-color: #999;
+    }
+
+    .in-month.weekend-day {
+      background-color: #888;
+    }
+
+    .display-none {
+      display: none;
+    }
+
+    .display-flex {
+      display: flex;
+    }
+    
+    .calendar-input {
+      font-size: 3em;
+      height: 80px;
+      width: 110px;
+      margin-left: 6px;
+    }
+
+    .payperiod1 {
+      background-color: royalblue;
+    }
+
+    .payperiod2 {
+      background-color: navy;
+    }
+
+    .current-day {
+      background-color: orangered;
+    }
+
+    .rows {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .legend-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100px;
+      width: 125px;
+      margin: 10px;
+      border: solid 1px black;
+      color: white;
+      border-radius: 3px;
+    }
+
+    .legend-title {
+      width: 200px;
+    }
+
+    .legend-value {
+      width: 50px;
+    }
+
+    .legend-text {
+      margin-top: 30px;
+    }
+
+    ul.weekdays abbr[title] {
+      border: none;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+    }
+
+    .save-btn {
+      height: 75px;
+      width: 100px;
+      background-color: green;
+      color: white;
+      font-size: large;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    @media all and (max-width: 800px) {
+      ul, ol {
+        grid-gap: .25em;
+      }
+
+      ul.weekdays li {
+        font-size: 0;
+      }
+
+      ul.weekdays > li abbr:after {
+        content: attr(title);
+        font-size: calc(16px + (26 - 16) * ((100vw - 300px) / (1600 - 300)));
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calendar">
+    <header>
+      <!-- <h1>November 2017</h1> -->
+      <select class="head-input" name="months" id="months" dir="rtl">
+        <option value="01">January</option>
+        <option value="02">February</option>
+        <option value="03">March</option>
+        <option value="04">April</option>
+        <option value="05">May</option>
+        <option value="06">June</option>
+        <option value="07">July</option>
+        <option value="08">August</option>
+        <option value="09">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+      <input class="head-input" type="number" id="years" name="years" value="">
+    </header>
+
+    <ul class="weekdays">
+      <li>
+        <abbr title="S">Sunday</abbr>
+      </li>
+      <li>
+        <abbr title="M">Monday</abbr>
+      </li>
+      <li>
+        <abbr title="T">Tuesday</abbr>
+      </li>
+      <li>
+        <abbr title="W">Wednesday</abbr>
+      </li>
+      <li>
+        <abbr title="T">Thursday</abbr>
+      </li>
+      <li>
+        <abbr title="F">Friday</abbr>
+      </li>
+      <li>
+        <abbr title="S">Saturday</abbr>
+      </li>
+    </ul>
+
+    <ol id="daygrid" class="day-grid">
+      <li class="day out-month"></li>
+      <li class="day out-month"></li>
+      <li class="day out-month"></li>
+      <li id="1" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">1</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="2" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">2</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="3" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">3</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="4" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">4</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="5" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">5</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="6" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">6</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="7" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">7</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="8" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">8</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="9" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">9</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="10" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">10</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="11" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">11</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="12" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">12</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="13" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">13</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="14" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">14</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="15" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">15</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="16" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">16</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="17" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">17</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="18" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">18</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="19" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">19</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="20" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">20</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="21" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">21</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="22" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">22</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="23" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">23</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="24" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">24</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="25" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">25</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="26" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">26</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="27" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">27</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="28" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">28</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="29" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">29</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="30" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">30</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li id="31" class="day in-month">
+        <div class="display-flex">
+          <div class="day-num">31</div>
+          <select onchange="recountHours()">
+            <option value="reg">Reg</option>
+            <option value="pto">PTO</option>
+          </select>
+        </div>
+        <br>
+        <input type="number" class="calendar-input" placeholder="0" onchange="recountHours()" max="14" step="0.25"/>
+      </li>
+      <li class="day out-month"></li>
+      <li class="day out-month"></li>
+    </ol>
+  </div>
+  <div class="summary">
+    <div class="rows">
+      <div class="payperiod1 legend-box">Pay period 1</div>
+      <div class="legend-text">
+        <div class="rows">
+          <div class="legend-title">Expected hours pay period 1</div>
+          <div id="expect1" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">Worked hours pay period 1</div>
+          <div id="work1" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">PTO hours pay period 1</div>
+          <div id="pto1" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">Pay period 1 difference</div>
+          <div id="diff1" class="legend-value"></div>
+        </div>
+      </div>
+    </div>
+    <div class="rows">
+      <div class="payperiod2 legend-box">Pay period 2</div>
+      <div class="legend-text">
+        <div class="rows">
+          <div class="legend-title">Expected hours pay period 2</div>
+          <div id="expect2" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">Worked hours pay period 2</div>
+          <div id="work2" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">PTO hours pay period 2</div>
+          <div id="pto2" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">Pay period 2 difference</div>
+          <div id="diff2" class="legend-value"></div>
+        </div>
+      </div>
+    </div>
+    <div class="rows">
+      <div class="legend-box">Total month</div>
+      <div class="legend-text">
+        <div class="rows">
+          <div class="legend-title">Total expected hours</div>
+          <div id="expectTot" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">Total worked hours</div>
+          <div id="workTot" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">Total PTO hours</div>
+          <div id="ptoTot" class="legend-value"></div>
+        </div>
+        <div class="rows">
+          <div class="legend-title">Total difference</div>
+          <div id="diffTot" class="legend-value"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="summary">
+    <button class="save-btn" onclick="saveMonth()">Save Month</button>
+  </div>
+</body>
+
+<script>
+  window.onload = function(event) {
+    const monthElement = document.getElementById('months');
+    const yearElement = document.getElementById('years');
+
+    monthElement.addEventListener('change', (event) => {
+      const yearElement = document.getElementById('years');
+      var month = event.target.value;
+      var year = yearElement.value;
+      setCalendar(month, year);
+    });
+
+    yearElement.addEventListener('change', (event) => {
+      const monthElement = document.getElementById('months');
+      var month = monthElement.value;
+      var year = event.target.value;
+      setCalendar(month, year);
+    });
+
+    var today = new Date();
+    var month = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var year = today.getFullYear();
+    monthElement.value = month;
+    yearElement.value = year;
+    setCalendar(month, year);
+  }
+
+  function setCalendar(month, year) {
+    var currentMonthInfo = {};
+    try {
+      currentMonthInfo = JSON.parse(localStorage.getItem('CALENDAR_APP' + '_' + month + '_' + year)) || {};
+    } catch (e) {
+      console.log('no data for ' + month + ' ' + year);
+      currentMonthInfo = {};
+    }
+
+    var nonMonthElements = document.getElementsByClassName("out-month");
+    while (nonMonthElements.length) {
+      nonMonthElements[nonMonthElements.length-1].remove();
+    }
+
+    var inMonthElements = document.getElementsByClassName("in-month");
+    for (var i = 0; i < inMonthElements.length; i++) {
+      var currentDay = inMonthElements[i].id;
+      inMonthElements[i].className = "day in-month";
+      inMonthElements[i].getElementsByTagName('input')[0].removeAttribute('disabled');
+      var dayInfo = currentMonthInfo[currentDay];
+      var dayHours = dayInfo ? dayInfo.split(':')[0] : 0;
+      var dayType = dayInfo ? dayInfo.split(':')[1] || 'reg' : 'reg';
+      inMonthElements[i].getElementsByTagName('input')[0].value = dayHours;
+      inMonthElements[i].getElementsByTagName('select')[0].value = dayType;
+    }
+    
+    var daysInMonth = new Date(year, month, 0).getDate();
+
+    const firstDayOfMonthNum = new Date(year + '-' + month + '-' + '01').getDay(); 
+    const firstDayOfMonth = isNaN(firstDayOfMonthNum) ? null : 
+      ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][firstDayOfMonthNum];
+
+    var dayGrid = document.getElementById("daygrid");
+    for (var i = 0; i < firstDayOfMonthNum; i++) {
+      var listItem = document.createElement("li");
+      listItem.setAttribute("class", "day out-month");
+      dayGrid.prepend(listItem);
+    }
+
+    const lastDayOfMonthNum = new Date(year + '-' + month + '-' + daysInMonth).getDay();
+    
+    for (var i = lastDayOfMonthNum; i < 6; i++) {
+      var listItem = document.createElement("li");
+      listItem.setAttribute("class", "day out-month");
+      dayGrid.appendChild(listItem);
+    }
+
+    var today = new Date();
+    var currentMonth = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var currentYear = today.getFullYear();
+    var day = today.getDate();
+    if (currentMonth == month && currentYear == year) {
+      document.getElementById(day).classList.add("current-day");
+    }
+
+    // cut off the ending days if they go past the end of the month
+    var inMonthItems = document.getElementsByClassName("in-month");
+    for (var i = 28; i < inMonthItems.length; i++) {
+      if (inMonthItems[i].id > daysInMonth) {
+        inMonthItems[i].classList.add("display-none");
+      } else {
+        inMonthItems[i].classList.remove("display-none");
+      }
+    }
+    
+    var pp1Expected = 0;
+    var pp2Expected = 0;
+    var dayItems = document.getElementsByClassName("day");
+    for (var i = 0; i < dayItems.length; i++) {
+      if (dayItems[i].classList.contains('in-month') && ((i+1) % 7 == 0 || (i+1) % 7 == 1)) {
+        dayItems[i].classList.add("weekend-day");
+        dayItems[i].getElementsByTagName('input')[0].setAttribute('disabled', 'true');
+      } else if (dayItems[i].classList.contains('in-month') && dayItems[i].id < 16) {
+        dayItems[i].classList.add("payperiod1");
+        pp1Expected += 8;
+      } else if (dayItems[i].classList.contains('in-month') && !dayItems[i].classList.contains('display-none') && dayItems[i].id >= 16) {
+        dayItems[i].classList.add("payperiod2");
+        pp2Expected += 8;
+      }
+    }
+
+    document.getElementById('expect1').innerHTML = pp1Expected;
+    document.getElementById('expect2').innerHTML = pp2Expected;
+    recountHours();
+  }
+
+  function recountHours() {
+    var pp1Worked = 0;
+    var pp1Ptoed = 0;
+    var pp2Worked = 0;
+    var pp2Ptoed = 0;
+    var inMonthItems = document.getElementsByClassName("in-month");
+    for (var i = 0; i < inMonthItems.length; i++) {
+      var inMonthItem = inMonthItems[i];
+      if (inMonthItem.classList.contains('in-month') && inMonthItem.id < 16) {
+        if (inMonthItem.getElementsByTagName('select')[0].value == 'pto') {
+          pp1Ptoed += parseFloat(inMonthItem.getElementsByTagName('input')[0].value);
+        } else {
+          pp1Worked += parseFloat(inMonthItem.getElementsByTagName('input')[0].value);
+        }
+      }
+      if (inMonthItem.classList.contains('in-month') && inMonthItem.id >= 16) {
+        if (inMonthItem.getElementsByTagName('select')[0].value == 'pto') {
+          pp2Ptoed += parseFloat(inMonthItem.getElementsByTagName('input')[0].value);
+        } else {
+          pp2Worked += parseFloat(inMonthItem.getElementsByTagName('input')[0].value);
+        }
+      }
+    }
+    var pp1Expected = parseFloat(document.getElementById('expect1').innerHTML);
+    document.getElementById('work1').innerHTML = pp1Worked;
+    document.getElementById('pto1').innerHTML = pp1Ptoed;
+    document.getElementById('diff1').innerHTML = (pp1Worked + pp1Ptoed) - pp1Expected;
+    var pp2Expected = parseFloat(document.getElementById('expect2').innerHTML);
+    document.getElementById('work2').innerHTML = pp2Worked;
+    document.getElementById('pto2').innerHTML = pp2Ptoed;
+    document.getElementById('diff2').innerHTML = (pp2Worked + pp2Ptoed) - pp2Expected;
+    document.getElementById('expectTot').innerHTML = pp1Expected + pp2Expected;
+    document.getElementById('workTot').innerHTML = pp1Worked + pp2Worked;
+    document.getElementById('ptoTot').innerHTML = pp1Ptoed + pp2Ptoed;
+    document.getElementById('diffTot').innerHTML = (pp1Worked + pp2Worked + pp1Ptoed + pp2Ptoed) - (pp1Expected + pp2Expected);
+  }
+
+  function saveMonth() {
+    var monthObj = {};
+    
+    var inMonthItems = document.getElementsByClassName("in-month");
+    for (var i = 0; i < inMonthItems.length; i++) {
+      var dayNum = parseInt(inMonthItems[i].id);
+      var dayHours = parseFloat(inMonthItems[i].getElementsByTagName('input')[0].value);
+      var dayType = inMonthItems[i].getElementsByTagName('select')[0].value;
+      monthObj[dayNum] = dayHours + ":" + dayType;
+    }
+
+    const month = document.getElementById('months').value;
+    const year = document.getElementById('years').value;
+
+    localStorage.setItem('CALENDAR_APP' + '_' + month + '_' + year, JSON.stringify(monthObj));
+  }
+</script>
+</html>
